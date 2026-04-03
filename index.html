@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Vehicle Counter</title>
+	<style>
+		@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@700;800&display=swap");
+
+		:root {
+			--bg-primary: #0A0A0A;
+			--bg-secondary: #111111;
+			--bg-card: #1A1A1A;
+			--accent-green: #00FF94;
+			--accent-green-dim: #00CC77;
+			--text-primary: #FFFFFF;
+			--text-secondary: #888888;
+			--text-muted: #444444;
+			--border: #222222;
+			--error: #FF4444;
+			--warning: #FFB800;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		html,
+		body {
+			height: 100%;
+		}
+
+		body {
+			margin: 0;
+			min-height: 100vh;
+			background: var(--bg-primary);
+			color: var(--text-primary);
+			font-family: "DM Sans", sans-serif;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 24px;
+		}
+
+		.app-card {
+			width: min(720px, 100%);
+			background: var(--bg-card);
+			border: 1px solid var(--border);
+			border-radius: 16px;
+			margin: 0 auto;
+			padding: 40px 48px;
+			animation: pageIn 0.4s ease-out;
+		}
+
+		.badge {
+			display: inline-block;
+			background: #00FF9415;
+			border: 1px solid #00FF9440;
+			color: var(--accent-green);
+			font-size: 12px;
+			font-weight: 700;
+			padding: 6px 12px;
+			border-radius: 999px;
+			margin: 0 auto 14px;
+		}
+
+		.header {
+			text-align: center;
+		}
+
+		h1 {
+			font-family: "Syne", sans-serif;
+			font-size: clamp(42px, 6vw, 48px);
+			font-weight: 800;
+			line-height: 1.05;
+			margin: 0;
+		}
+
+		.gradient-text {
+			background: linear-gradient(135deg, #00FF94, #00CC77);
+			background-clip: text;
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+		}
+
+		.subtitle {
+			margin: 14px auto 0;
+			max-width: 520px;
+			color: var(--text-secondary);
+			font-size: 16px;
+		}
+
+		.section {
+			margin-top: 28px;
+			animation: stageIn 0.3s ease;
+		}
+
+		.hidden {
+			display: none;
+		}
+
+		label {
+			display: block;
+			color: var(--text-secondary);
+			font-size: 14px;
+			margin-bottom: 8px;
+		}
+
+		.upload-zone {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			min-height: 160px;
+			gap: 10px;
+			text-align: center;
+			background: var(--bg-secondary);
+			border: 2px dashed var(--border);
+			border-radius: 12px;
+			padding: 40px 24px;
+			cursor: pointer;
+			transition: all 0.2s ease;
+		}
+
+		.upload-zone:hover {
+			border-color: var(--accent-green);
+			background: #00FF9408;
+		}
+
+		.upload-zone.selected .upload-main {
+			color: var(--accent-green);
+		}
+
+		.upload-icon {
+			width: 34px;
+			height: 34px;
+			color: var(--accent-green);
+		}
+
+		.upload-main {
+			font-size: 18px;
+			font-weight: 700;
+		}
+
+		.upload-sub {
+			font-size: 14px;
+			color: var(--text-muted);
+		}
+
+		.sensitivity-wrap {
+			margin-top: 18px;
+		}
+
+		.sensitivity-pills {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 8px;
+		}
+
+		.sensitivity-pill {
+			background: var(--bg-card);
+			border: 1px solid var(--border);
+			color: var(--text-secondary);
+			border-radius: 999px;
+			height: 40px;
+			font-family: "DM Sans", sans-serif;
+			font-weight: 500;
+			cursor: pointer;
+			transition: all 0.2s ease;
+		}
+
+		.sensitivity-pill.active {
+			background: var(--accent-green);
+			color: var(--bg-primary);
+			font-weight: 700;
+			border-color: var(--accent-green);
+		}
+
+		#estimatedTime {
+			margin-top: 12px;
+			color: var(--text-secondary);
+			font-size: 14px;
+		}
+
+		.stage-actions {
+			margin-top: 18px;
+			display: flex;
+			gap: 10px;
+			flex-wrap: wrap;
+		}
+
+		button,
+		.download-link {
+			border: none;
+			border-radius: 10px;
+			width: 100%;
+			min-height: 52px;
+			height: 52px;
+			padding: 0 18px;
+			font-family: "DM Sans", sans-serif;
+			font-size: 16px;
+			font-weight: 700;
+			cursor: pointer;
+			transition: all 0.2s ease;
+			text-decoration: none;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 8px;
+		}
+
+		button:active,
+		.download-link:active {
+			transform: scale(0.98);
+		}
+
+		.btn-accent {
+			width: 100%;
+			background: linear-gradient(135deg, #00FF94, #00CC77);
+			color: var(--bg-primary);
+		}
+
+		.btn-accent:hover,
+		.download-link.btn-accent:hover {
+			opacity: 0.9;
+			transform: translateY(-1px);
+		}
+
+		.sample-link {
+			background: transparent;
+			height: 52px;
+			padding: 0;
+			font-size: 16px;
+			font-weight: 500;
+			color: var(--text-muted);
+			justify-content: flex-start;
+		}
+
+		.sample-link:hover {
+			color: var(--accent-green);
+			transform: none;
+		}
+
+		.btn-muted {
+			background: transparent;
+			border: 1px solid var(--border);
+			color: var(--text-secondary);
+		}
+
+		.btn-muted:hover {
+			border-color: var(--accent-green);
+			color: var(--accent-green);
+			transform: translateY(-1px);
+		}
+
+		.error {
+			min-height: 1.2em;
+			margin-top: 10px;
+			font-size: 13px;
+			color: #FF9999;
+		}
+
+		#errorBox {
+			display: none;
+			background: #FF444410;
+			border-left: 3px solid var(--error);
+			color: #FF9999;
+			border-radius: 8px;
+			padding: 16px;
+			font-size: 14px;
+			margin-top: 14px;
+		}
+
+		.line-title {
+			font-family: "Syne", sans-serif;
+			font-size: 20px;
+			font-weight: 700;
+			margin: 0;
+		}
+
+		.line-instruction {
+			margin: 6px 0 14px;
+			color: var(--text-secondary);
+			font-size: 14px;
+		}
+
+		.preview-wrap {
+			position: relative;
+			width: 100%;
+			border-radius: 12px;
+			overflow: hidden;
+			border: 1px solid var(--border);
+			user-select: none;
+			touch-action: none;
+			background: var(--bg-secondary);
+		}
+
+		.preview-wrap img {
+			display: block;
+			width: 100%;
+			height: auto;
+		}
+
+		.count-line {
+			position: absolute;
+			left: 0;
+			right: 0;
+			height: 3px;
+			background: var(--warning);
+			cursor: ns-resize;
+		}
+
+		.count-line::before {
+			content: "COUNTING LINE";
+			position: absolute;
+			right: 10px;
+			top: -18px;
+			background: var(--warning);
+			color: var(--bg-primary);
+			font-size: 10px;
+			font-weight: 700;
+			padding: 2px 8px;
+			border-radius: 4px;
+			letter-spacing: 0.3px;
+		}
+
+		.line-meta {
+			display: inline-block;
+			margin-top: 10px;
+			background: #FFB80020;
+			border: 1px solid #FFB80040;
+			color: var(--warning);
+			padding: 4px 12px;
+			border-radius: 20px;
+			font-size: 13px;
+		}
+
+		.progress-title {
+			margin: 0;
+			font-family: "Syne", sans-serif;
+			font-size: 24px;
+			font-weight: 700;
+		}
+
+		.progress-shell {
+			width: 100%;
+			height: 8px;
+			border-radius: 100px;
+			background: var(--bg-secondary);
+			overflow: hidden;
+			margin-top: 14px;
+		}
+
+		.progress-fill {
+			width: 0%;
+			height: 100%;
+			background: linear-gradient(90deg, #00FF94, #00CC77, #00FF94);
+			background-size: 200% 100%;
+			transition: width 0.5s ease;
+			animation: shimmer 2s linear infinite;
+		}
+
+		.progress-text {
+			margin-top: 14px;
+			font-family: "Syne", sans-serif;
+			font-size: clamp(36px, 8vw, 48px);
+			font-weight: 700;
+			color: var(--accent-green);
+		}
+
+		.progress-status {
+			margin-top: 2px;
+			color: var(--text-secondary);
+			font-size: 14px;
+		}
+
+		#liveFrame {
+			width: 100%;
+			border-radius: 12px;
+			border: 1px solid var(--border);
+			margin-top: 20px;
+			background: var(--bg-secondary);
+		}
+
+		.result-badge {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			background: #00FF9415;
+			border: 1px solid #00FF9440;
+			color: var(--accent-green);
+			padding: 8px 14px;
+			border-radius: 999px;
+			font-size: 13px;
+			font-weight: 700;
+		}
+
+		.stats-grid {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 12px;
+			margin-top: 14px;
+		}
+
+		.stat-card {
+			background: var(--bg-secondary);
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			min-height: 100px;
+			padding: 20px;
+			text-align: left;
+			transition: all 0.2s ease;
+		}
+
+		.stat-card:hover {
+			transform: translateY(-2px);
+			border-color: #333333;
+		}
+
+		.stat-card.total {
+			grid-column: 1 / -1;
+			background: linear-gradient(135deg, #00FF9415, #00FF9408);
+			border-color: #00FF9440;
+		}
+
+		.stat-value {
+			font-family: "Syne", sans-serif;
+			font-size: 36px;
+			font-weight: 700;
+			line-height: 1;
+		}
+
+		.stat-card.total .stat-value {
+			font-size: 64px;
+			font-weight: 800;
+			color: var(--accent-green);
+		}
+
+		.stat-label {
+			margin-top: 8px;
+			font-size: 12px;
+			text-transform: uppercase;
+			letter-spacing: 0.12em;
+			color: var(--text-secondary);
+		}
+
+		.stat-card.total .stat-label {
+			font-size: 14px;
+		}
+
+		#resultVideo {
+			width: 100%;
+			border-radius: 12px;
+			overflow: hidden;
+			border: 1px solid var(--border);
+			margin: 20px 0;
+			background: #000000;
+		}
+
+		.download-link {
+			flex: 1;
+		}
+
+		@keyframes shimmer {
+			0% {
+				background-position: 0% 0;
+			}
+			100% {
+				background-position: 200% 0;
+			}
+		}
+
+		@keyframes pageIn {
+			0% {
+				opacity: 0;
+				transform: translateY(20px);
+			}
+			100% {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+
+		@keyframes stageIn {
+			0% {
+				opacity: 0;
+				transform: translateY(8px);
+			}
+			100% {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+
+		@media (max-width: 600px) {
+			body {
+				padding: 12px;
+			}
+
+			.app-card {
+				padding: 20px;
+			}
+
+			h1 {
+				font-size: 42px;
+			}
+
+			.progress-text {
+				font-size: 36px;
+			}
+
+			.stats-grid {
+				grid-template-columns: 1fr;
+			}
+
+			button,
+			.download-link {
+				width: 100%;
+				min-height: 52px;
+				height: 52px;
+			}
+
+			.sample-link {
+				height: 52px;
+			}
+		}
+	</style>
+</head>
+<body>
+	<main class="app-card">
+		<header class="header">
+			<div class="badge">AI Powered</div>
+			<h1>Vehicle <span class="gradient-text">Counter</span></h1>
+			<p class="subtitle">Upload a traffic video. AI detects and counts every vehicle.</p>
+		</header>
+
+		<section id="stage-upload" class="section">
+			<input id="videoFile" type="file" accept=".mp4,.avi,.mov,.mkv" required style="display:none">
+			<label for="videoFile" id="uploadZone" class="upload-zone">
+				<svg class="upload-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+					<path d="M12 16V4M12 4L7 9M12 4L17 9M5 20H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+				</svg>
+				<div id="uploadMain" class="upload-main">Drop your video here</div>
+				<div class="upload-sub">MP4, AVI, MOV up to 100MB</div>
+			</label>
+
+			<div class="sensitivity-wrap">
+				<label for="sensitivity">Sensitivity</label>
+				<select id="sensitivity" style="display:none">
+					<option value="low">Low (catches more)</option>
+					<option value="medium" selected>Medium</option>
+					<option value="high">High (precise)</option>
+				</select>
+				<div class="sensitivity-pills" id="sensitivityPills">
+					<button class="sensitivity-pill" data-value="low" type="button">Low</button>
+					<button class="sensitivity-pill active" data-value="medium" type="button">Medium</button>
+					<button class="sensitivity-pill" data-value="high" type="button">High</button>
+				</div>
+			</div>
+
+			<div id="estimatedTime"></div>
+			<div class="stage-actions">
+				<button id="btnPreview" class="btn-accent" type="button">Upload &amp; Preview</button>
+			</div>
+			<div class="stage-actions" style="margin-top:10px;">
+				<button class="sample-link" type="button" onclick="trySample()">or try with a sample video -&gt;</button>
+			</div>
+			<div id="errorBox"></div>
+			<div id="uploadError" class="error"></div>
+		</section>
+
+		<section id="stage-line" class="section hidden">
+			<p class="line-title">Set counting line</p>
+			<p class="line-instruction">Drag the yellow line to where you want vehicles counted</p>
+			<div id="previewWrap" class="preview-wrap">
+				<img id="previewImage" alt="Video preview frame">
+				<div id="countLine" class="count-line" style="top: 55%;"></div>
+			</div>
+			<p id="linePercentText" class="line-meta">Current line position: 55%</p>
+			<div class="stage-actions">
+				<button id="btnStart" class="btn-accent" type="button">Start Processing</button>
+			</div>
+			<div id="lineError" class="error"></div>
+		</section>
+
+		<section id="stage-progress" class="section hidden">
+			<h2 class="progress-title">Processing your video...</h2>
+			<div class="progress-shell">
+				<div id="progressFill" class="progress-fill"></div>
+			</div>
+			<div id="progressText" class="progress-text">Processing... 0%</div>
+			<div class="progress-status">Detecting vehicles...</div>
+			<img id="liveFrame" alt="Live processing frame">
+			<div id="progressError" class="error"></div>
+		</section>
+
+		<section id="stage-results" class="section hidden">
+			<div class="result-badge">✓ Processing Complete</div>
+			<div class="stats-grid">
+				<div class="stat-card total">
+					<div id="statTotal" class="stat-value">0</div>
+					<div class="stat-label">Total Vehicles</div>
+				</div>
+				<div class="stat-card">
+					<div id="statCars" class="stat-value">0</div>
+					<div class="stat-label">Cars</div>
+				</div>
+				<div class="stat-card">
+					<div id="statBikes" class="stat-value">0</div>
+					<div class="stat-label">Motorcycles</div>
+				</div>
+				<div class="stat-card">
+					<div id="statBuses" class="stat-value">0</div>
+					<div class="stat-label">Buses</div>
+				</div>
+				<div class="stat-card">
+					<div id="statTrucks" class="stat-value">0</div>
+					<div class="stat-label">Trucks</div>
+				</div>
+			</div>
+
+			<video id="outputVideo" controls style="width:100%;border-radius:12px;border:1px solid #222;margin:20px 0;display:none;background:#000;max-height:400px;object-fit:contain">
+				<source id="outputSource" type="video/mp4">
+				Your browser does not support the video tag.
+			</video>
+
+			<div class="stage-actions">
+				<a id="downloadBtn" class="download-link btn-accent" href="#">
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+						<path d="M12 3V15M12 15L7 10M12 15L17 10M4 20H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+					Download Annotated Video
+				</a>
+				<button id="btnReset" class="btn-muted" type="button">Analyse Another Video</button>
+			</div>
+		</section>
+	</main>
+
+	<script>
+		(function () {
+			const allowedExt = new Set([".mp4", ".avi", ".mov", ".mkv"]);
+
+			const stageUpload = document.getElementById("stage-upload");
+			const stageLine = document.getElementById("stage-line");
+			const stageProgress = document.getElementById("stage-progress");
+			const stageResults = document.getElementById("stage-results");
+
+			const videoInput = document.getElementById("videoFile");
+			const sensitivitySelect = document.getElementById("sensitivity");
+			const btnPreview = document.getElementById("btnPreview");
+			const btnStart = document.getElementById("btnStart");
+			const btnReset = document.getElementById("btnReset");
+
+			const uploadError = document.getElementById("uploadError");
+			const lineError = document.getElementById("lineError");
+			const progressError = document.getElementById("progressError");
+
+			const previewWrap = document.getElementById("previewWrap");
+			const previewImage = document.getElementById("previewImage");
+			const countLine = document.getElementById("countLine");
+			const linePercentText = document.getElementById("linePercentText");
+
+			const progressFill = document.getElementById("progressFill");
+			const progressText = document.getElementById("progressText");
+			const liveFrame = document.getElementById("liveFrame");
+			const outputVideo = document.getElementById("outputVideo");
+			const outputSource = document.getElementById("outputSource");
+			const estimatedTime = document.getElementById("estimatedTime");
+			const errorBox = document.getElementById("errorBox");
+			const uploadZone = document.getElementById("uploadZone");
+			const uploadMain = document.getElementById("uploadMain");
+			const sensitivityPills = document.getElementById("sensitivityPills");
+
+			const statTotal = document.getElementById("statTotal");
+			const statCars = document.getElementById("statCars");
+			const statBikes = document.getElementById("statBikes");
+			const statBuses = document.getElementById("statBuses");
+			const statTrucks = document.getElementById("statTrucks");
+			const downloadBtn = document.getElementById("downloadBtn");
+
+			let selectedFile = null;
+			let linePercent = 55;
+			let pollTimer = null;
+			let dragging = false;
+			let liveFrameObjectUrl = null;
+
+			function showError(message) {
+				errorBox.textContent = message;
+				errorBox.style.display = "block";
+			}
+
+			function hideError() {
+				errorBox.style.display = "none";
+				errorBox.textContent = "";
+			}
+
+			function mapErrorMessage(rawMessage) {
+				const msg = String(rawMessage || "").toLowerCase();
+				if (msg.includes("please select a video file first")) return "Please select a video file first";
+				if (msg.includes("unsupported file type") || msg.includes("invalid file type")) return "Only MP4, AVI, MOV files are supported";
+				if (msg.includes("file too large") || msg.includes("100mb")) return "File too large — maximum size is 100MB";
+				if (msg.includes("video too long") || msg.includes("under 2 minutes")) return "Video too long — please upload under 2 minutes";
+				return "Server is busy — please try again in a moment";
+			}
+
+			function showStage(name) {
+				stageUpload.classList.add("hidden");
+				stageLine.classList.add("hidden");
+				stageProgress.classList.add("hidden");
+				stageResults.classList.add("hidden");
+
+				if (name === "upload") stageUpload.classList.remove("hidden");
+				if (name === "line") stageLine.classList.remove("hidden");
+				if (name === "progress") stageProgress.classList.remove("hidden");
+				if (name === "results") stageResults.classList.remove("hidden");
+			}
+
+			function clearErrors() {
+				hideError();
+				uploadError.textContent = "";
+				lineError.textContent = "";
+				progressError.textContent = "";
+			}
+
+			function getFileExtension(name) {
+				const dot = name.lastIndexOf(".");
+				return dot >= 0 ? name.slice(dot).toLowerCase() : "";
+			}
+
+			function validateSelectedFile() {
+				const file = videoInput.files && videoInput.files[0];
+				if (!file) {
+					showError("Please select a video file first");
+					return null;
+				}
+
+				const ext = getFileExtension(file.name);
+				if (!allowedExt.has(ext)) {
+					showError("Only MP4, AVI, MOV files are supported");
+					return null;
+				}
+
+				return file;
+			}
+
+			function setLineFromPercent(value) {
+				linePercent = Math.max(0, Math.min(100, value));
+				countLine.style.top = linePercent + "%";
+				linePercentText.textContent = "Current line position: " + linePercent.toFixed(1) + "%";
+			}
+
+			function updateLinePositionFromPointer(clientY) {
+				const rect = previewWrap.getBoundingClientRect();
+				const y = clientY - rect.top;
+				const pct = (y / rect.height) * 100;
+				setLineFromPercent(pct);
+			}
+
+			function startPolling(jobId) {
+				if (pollTimer) {
+					clearInterval(pollTimer);
+				}
+
+				pollTimer = setInterval(async function () {
+					try {
+						const response = await fetch("/status/" + encodeURIComponent(jobId));
+						if (!response.ok) {
+							throw new Error("Could not fetch job status.");
+						}
+
+						const data = await response.json();
+						const progress = Math.max(0, Math.min(100, Number(data.progress || 0)));
+
+						try {
+							const frameResp = await fetch("/current-frame/" + encodeURIComponent(jobId));
+							if (frameResp.ok) {
+								const frameBlob = await frameResp.blob();
+								if (liveFrameObjectUrl) {
+									URL.revokeObjectURL(liveFrameObjectUrl);
+								}
+								liveFrameObjectUrl = URL.createObjectURL(frameBlob);
+								liveFrame.src = liveFrameObjectUrl;
+							}
+						} catch (e) {
+							// Keep status polling independent from frame preview fetch failures
+						}
+
+						progressFill.style.width = progress + "%";
+						progressText.textContent = "Processing... " + progress + "%";
+
+						if (data.status === "done") {
+							clearInterval(pollTimer);
+							pollTimer = null;
+							progressFill.style.width = "100%";
+							progressText.textContent = "Processing... 100%";
+
+							statTotal.textContent = String(data.total ?? 0);
+							statCars.textContent = String(data.cars ?? 0);
+							statBikes.textContent = String(data.bikes ?? 0);
+							statBuses.textContent = String(data.buses ?? 0);
+							statTrucks.textContent = String(data.trucks ?? 0);
+
+							const videoPlayer = document.getElementById('outputVideo');
+							const videoSource = document.getElementById('outputSource');
+							videoSource.src = '/stream/' + data.output_filename;
+							videoPlayer.load();
+							videoPlayer.style.display = 'block';
+							downloadBtn.href = "/download/" + encodeURIComponent(data.output_filename || "");
+							showStage("results");
+						} else if (data.status === "error") {
+							clearInterval(pollTimer);
+							pollTimer = null;
+							showError(mapErrorMessage(data.error || "Processing failed."));
+							progressError.textContent = data.error || "Processing failed.";
+						}
+					} catch (err) {
+						clearInterval(pollTimer);
+						pollTimer = null;
+						showError(mapErrorMessage(err.message || "Status polling failed."));
+						progressError.textContent = err.message || "Status polling failed.";
+					}
+				}, 2000);
+			}
+
+			function estimateProcessingTime(file) {
+				estimatedTime.textContent = "";
+				const video = document.createElement("video");
+				const objectUrl = URL.createObjectURL(file);
+				video.src = objectUrl;
+				video.ondurationchange = function () {
+					if (!Number.isFinite(video.duration) || video.duration <= 0) {
+						return;
+					}
+					const mins = Math.ceil(video.duration / 60 * 2);
+					estimatedTime.textContent = "Estimated processing time: ~" + mins + " minutes";
+					URL.revokeObjectURL(objectUrl);
+				};
+			}
+
+			async function trySample() {
+				clearErrors();
+				progressFill.style.width = "0%";
+				progressText.textContent = "Processing... 0%";
+				showStage("progress");
+				try {
+					const response = await fetch("/sample", {
+						method: "GET"
+					});
+					const data = await response.json();
+					if (!response.ok) {
+						throw new Error((data && data.error) || "Upload failed.");
+					}
+					if (!data.job_id) {
+						throw new Error("No job ID returned by server.");
+					}
+					startPolling(data.job_id);
+				} catch (err) {
+					showError(mapErrorMessage(err.message || "Could not start processing."));
+					progressError.textContent = err.message || "Could not start processing.";
+				}
+			}
+
+			window.trySample = trySample;
+
+			videoInput.addEventListener("change", function () {
+				const file = videoInput.files && videoInput.files[0];
+				if (!file) {
+					estimatedTime.textContent = "";
+					uploadZone.classList.remove("selected");
+					uploadMain.textContent = "Drop your video here";
+					return;
+				}
+				uploadZone.classList.add("selected");
+				uploadMain.textContent = file.name;
+				estimateProcessingTime(file);
+			});
+
+			sensitivityPills.addEventListener("click", function (e) {
+				const target = e.target.closest(".sensitivity-pill");
+				if (!target) return;
+				const value = target.getAttribute("data-value");
+				sensitivitySelect.value = value;
+				Array.from(sensitivityPills.querySelectorAll(".sensitivity-pill")).forEach(function (btn) {
+					btn.classList.toggle("active", btn === target);
+				});
+			});
+
+			btnPreview.addEventListener("click", async function () {
+				clearErrors();
+
+				const file = validateSelectedFile();
+				if (!file) {
+					return;
+				}
+
+				selectedFile = file;
+				btnPreview.disabled = true;
+				btnPreview.textContent = "Generating Preview...";
+
+				const formData = new FormData();
+				formData.append("file", selectedFile);
+
+				try {
+					const response = await fetch("/preview", {
+						method: "POST",
+						body: formData
+					});
+
+					if (!response.ok) {
+						let message = "Preview generation failed.";
+						try {
+							const err = await response.json();
+							if (err && err.error) {
+								message = err.error;
+							}
+						} catch (e) {
+							// Keep generic message
+						}
+						throw new Error(message);
+					}
+
+					const blob = await response.blob();
+					const previewUrl = URL.createObjectURL(blob);
+					previewImage.onload = function () {
+						URL.revokeObjectURL(previewUrl);
+					};
+					previewImage.src = previewUrl;
+
+					setLineFromPercent(55);
+					showStage("line");
+				} catch (err) {
+					showError(mapErrorMessage(err.message || "Unable to generate preview."));
+					uploadError.textContent = err.message || "Unable to generate preview.";
+				} finally {
+					btnPreview.disabled = false;
+					btnPreview.textContent = "Upload & Preview";
+				}
+			});
+
+			btnStart.addEventListener("click", async function () {
+				clearErrors();
+
+				if (!selectedFile) {
+					showError("Please select a video file first");
+					lineError.textContent = "Please upload and preview a video first.";
+					return;
+				}
+
+				btnStart.disabled = true;
+				btnStart.textContent = "Starting...";
+
+				const formData = new FormData();
+				formData.append("file", selectedFile);
+				formData.append("line_position", String(linePercent / 100));
+				formData.append("sensitivity", sensitivitySelect.value);
+
+				try {
+					const response = await fetch("/upload", {
+						method: "POST",
+						body: formData
+					});
+
+					const data = await response.json();
+					if (!response.ok) {
+						throw new Error((data && data.error) || "Upload failed.");
+					}
+
+					if (!data.job_id) {
+						throw new Error("No job ID returned by server.");
+					}
+
+					progressFill.style.width = "0%";
+					progressText.textContent = "Processing... 0%";
+					showStage("progress");
+					startPolling(data.job_id);
+				} catch (err) {
+					showError(mapErrorMessage(err.message || "Could not start processing."));
+					lineError.textContent = err.message || "Could not start processing.";
+				} finally {
+					btnStart.disabled = false;
+					btnStart.textContent = "Start Processing";
+				}
+			});
+
+			btnReset.addEventListener("click", function () {
+				window.location.reload();
+			});
+
+			function handleMouseDown(e) {
+				e.preventDefault();
+				dragging = true;
+			}
+
+			function handleMouseMove(e) {
+				if (!dragging) return;
+				updateLinePositionFromPointer(e.clientY);
+			}
+
+			function handleMouseUp() {
+				dragging = false;
+			}
+
+			countLine.addEventListener("mousedown", handleMouseDown);
+
+			window.addEventListener("mousemove", handleMouseMove);
+
+			window.addEventListener("mouseup", handleMouseUp);
+
+			previewWrap.addEventListener("touchstart", function (e) {
+				handleMouseDown(e);
+				updateLinePositionFromPointer(e.touches[0].clientY);
+			}, { passive: true });
+
+			previewWrap.addEventListener("touchmove", function (e) {
+				handleMouseMove({ clientY: e.touches[0].clientY });
+			}, { passive: true });
+
+			previewWrap.addEventListener("touchend", function () {
+				handleMouseUp();
+			});
+		})();
+	</script>
+</body>
+</html>
