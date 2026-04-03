@@ -29,7 +29,7 @@ A web application that counts vehicles in uploaded videos using **YOLOv8m** for 
 
 1. **Upload** a video file through the web interface.
 2. The backend processes each frame using **YOLOv8m** to detect vehicles.
-3. **BotSort** assigns a unique ID to every detected vehicle and maintains that ID across frames, so the same vehicle is never counted twice even if it briefly leaves and re-enters the frame.
+3. **BotSort** assigns a unique ID to every detected vehicle and maintains that ID across frames, minimizing duplicate counts even when a vehicle briefly leaves and re-enters the frame.
 4. Once the video is fully processed, the application returns the **total unique vehicle count**.
 
 ---
@@ -80,4 +80,4 @@ Open your browser and navigate to `http://localhost:5000` (or the port shown in 
 
 ## License
 
-This project is open-source. Feel free to use, modify, and distribute it.
+This project is licensed under the [MIT License](LICENSE). Feel free to use, modify, and distribute it.
